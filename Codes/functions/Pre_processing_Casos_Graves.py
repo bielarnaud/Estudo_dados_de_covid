@@ -13,7 +13,7 @@ list_features = ['data_notificacao','sexo','raca','etnia','idade','municipio_res
 columns_to_drop = ['etnia','municipio_residencia','raca','profissional_saude','distrito_sanitario','categoria_profissional']
 columns_geral = ['sexo','data_notificacao','idade','data_inicio_sintomas','classificacao_final','bairro','evolucao','data_obito']
 columns_symptoms = ['sintomas','outros_sintomas']
-columns_dieases = ['doencas_preexistentes','outras_doencas_preexistentes']
+columns_dieases = ['outras_doencas_preexistentes ','doencas_preexistentes']
 
 #Categorias dos sintomas
 list_symptoms =["SYMPTOM_COUGH",'SYMPTOM_COLD','SYMPTOM_AIR_INSUFFICIENCY','SYMPTOM_FEVER','SYMPTOM_LOW_OXYGEN_SATURATION','SYMPTOM_BREATHING_CONDITION','SYMPTOM_TORACIC_APERTURE','SYMPTOM_THROAT_CONDITION',
@@ -66,21 +66,24 @@ MAIN_DISEASES = {
 class Pre_Processing_Casos_Graves:
     def __init__(self):
         #self.csv = pd.read_csv(r"C:\Users\gabri\Desktop\TCC\Data\vacinados.csv",index_col=None, header=0,sep=';',decimal=',')
-        self.df = None
-        self.df2 = None
+        self.df = None #Dataset completo
+        self.df2 = None #Dataset com o número de aparições de cada sintoma
+        self.df3 = None #Dataser com o número de aparições de cada doença
         self.path = None
         self.df_temp = None 
 
-
-    def run(self,columns_geral,columns_symptoms,columns_to_drop,path):
+    #Função para rodar todas as outras na ordem certa!! Teoricamente só usando a run ja faz o pré processamento!!
+    def run(self,columns_geral,columns_symptoms,columns_to_drop,columns_dieases,path):
         self.merge(path)
-        self.Fillna(columns_geral,columns_symptoms)
+        self.Fillna(columns_geral,columns_symptoms,columns_dieases)
         self.Drop(columns_to_drop)
         self.Split_symbols(columns_symptoms[0],columns_symptoms[1],columns_dieases[0],columns_dieases[1])
         self.add_symptoms_columns()
         self.add_dieases_columns()
         self.categorizing_symptoms()
+        self.categorizing_dieases()
         self.creating_data_symptoms()
+        self.creating_data_dieases()
 
     #Concatenando os datasets
     def merge (self,path):
@@ -133,10 +136,6 @@ class Pre_Processing_Casos_Graves:
         for column, value in MAIN_SYMPTOMS.items():
             self.df[column] = 0
     
-    def add_dieases_columns(self):
-        for column, value in MAIN_DISEASES.items():
-            self.df[column] = 0
-    
     def categorizing_symptoms(self):
         for i in range(len(self.df)):
             for column,value in MAIN_SYMPTOMS.items():
@@ -144,15 +143,36 @@ class Pre_Processing_Casos_Graves:
                     if (symptom in self.df['sintomas'][i]) or (symptom in self.df['outros_sintomas'][i]):
                         self.df[column][i] = 1
     
-    #Criando Dataset com o número de aparições dos sintomas: 
+    #Categorizando as doenças preexistentes
+    def add_dieases_columns(self):
+        for column, value in MAIN_DISEASES.items():
+            self.df[column] = 0
+
+    def categorizing_dieases(self):
+        for i in range(len(self.df)):
+            for column,value in MAIN_DISEASES.items():
+                for dieases in value:
+                    if (dieases in self.df['doencas_preexistentes'][i]) or (dieases in self.df['outras_doencas_preexistentes '][i]):
+                        self.df[column][i] = 1
+    
+    #Criando Dataset com o número de aparições dos sintomas e doenças: 
 
     def creating_data_symptoms(self):
         count_symptoms = []
 
         for symptom in list_symptoms: 
-            count = len(self.df[self.df[symptom]==1])
+            count = len(self.df[self.df[symptom] == 1])
             count_symptoms.append(count)
         
         self.df2 = pd.DataFrame(list_symptoms,columns=["Sintoma"])
         self.df2["Count"] = count_symptoms
-    
+
+    def creating_data_dieases(self):
+        count_dieases = []
+
+        for dieases in list_dieases:
+            count = len(self.df[self.df[dieases] == 1])
+            count_dieases.append(count)
+
+        self.df3 = pd.DataFrame(list_dieases, columns=["Doencas_preexistentes"])
+        self.df3['Count'] = count_dieases

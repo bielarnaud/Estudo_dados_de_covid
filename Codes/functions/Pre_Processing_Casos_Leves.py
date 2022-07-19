@@ -44,11 +44,7 @@ MAIN_SYMPTOMS = {
 
 class Pre_Processing_Casos_Leves:
     def __init__(self):
-        #self.csv = pd.read_csv(r"C:\Users\gabri\Desktop\TCC\Data\vacinados.csv",index_col=None, header=0,sep=';',decimal=',')
         self.df = None
-        # self.columns_geral = columns_geral
-        # self.columns_symptoms = columns_symptoms
-        # self.columns_to_drop = columns_to_drop
         self.df2 = None
         self.path = None
         self.df_temp = None 
