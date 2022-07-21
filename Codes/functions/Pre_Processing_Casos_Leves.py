@@ -2,6 +2,7 @@
 import pandas as pd
 import numpy as np
 import glob
+from datetime import datetime
 
 # Repositório de armazenamento dos dados dos casos leves
 path = r'C:\Users\gabri\Desktop\Git - Tcc\Estudo_dados_de_covid\Data\Casos Leves'
@@ -71,12 +72,31 @@ class Pre_Processing_Casos_Leves:
             li.append(self.df_temp)
 
         self.df = pd.concat(li, axis=0, ignore_index=True)
+    
+    def age_adjustment (self):
+        list_months = ['IGN', '0 meses', '1 meses', '1 mês', '1 mes', '2 meses','3 meses','4 meses','5 meses', '6 meses', '7 meses','8 meses', 
+                        '9 meses','10 meses', '11 meses', '12 meses']
+
+        for i in range(len(self.df)):
+            if self.df['idade'][i] in list_months:
+                self.df['idade'][i] = 0
+            else:
+                self.df['idade'][i] = int(self.df['idade'][i])
+    
+    def types_adjustment(self):
+        self.df['data_inicio_sintomas'] = self.df['data_inicio_sintomas'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
+        self.df['data_notificacao'] = self.df['data_notificacao'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
+        self.df['idade'] = self.df['idade'].astype(int)
 
 
     #Ajustando os dados faltantes e Dropando as colunas não utilizadas
     def Fillna(self,columns_geral,columns_symptoms):
-        for column in columns_geral:
-            self.df[column].fillna("NÃO INFORMADO", inplace =True)
+        #Tratando dados features gerais
+        self.df['sexo'].fillna(self.df['sexo'].describe().top, inplace =True)
+        self.df['idade'].fillna(self.df['idade'].mode(), inplace =True)
+        self.df['bairro'].fillna(self.df['bairro'].describe().top, inplace =True)
+
+        # Tratando a feature dos sintomas
         for column in columns_symptoms:
             self.df[column].fillna( '' , inplace = True )
     
