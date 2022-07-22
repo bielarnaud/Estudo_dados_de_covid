@@ -108,6 +108,55 @@ class Pre_Processing_Casos_Graves:
                 self.df['idade'][i] = 0
             else:
                 self.df['idade'][i] = int(self.df['idade'][i])
+
+    def encoding_feature_sexo (self):
+        def categorizing_sexo(sexo):
+            if sexo == 'Masculino':
+                sexo = 1
+            elif sexo == 'Feminino':
+                sexo = 0
+            elif sexo == 'Ignorado':
+                sexo = 0
+
+            return sexo
+        
+        self.df['sexo'] = self.df['sexo'].apply(categorizing_sexo)
+    
+    def encoding_feature_classificacao_final(self):
+        def categorizing_classificacao(classificacao):
+            if classificacao == 'DESCARTADO':
+                classificacao = 0
+            elif classificacao == 'INCONCLUSIVO':
+                classificacao = 1
+            elif classificacao == 'CONFIRMADO':
+                classificacao = 2
+            elif classificacao == 'EM ANÁLISE':
+                classificacao == 3
+
+            return classificacao
+        
+        self.df['classificacao_final'] = self.df['classificacao_final'].apply(categorizing_classificacao)
+    
+    def encoding_feature_evolucao(self):
+        def categorizing_evolucao(evolucao):
+            if evolucao == 'ISOLAMENTO DOMICILIAR':
+                evolucao = 0
+            elif evolucao == 'INTERNADO LEITO DE ISOLAMENTO':
+                evolucao = 1
+            elif evolucao == 'RECUPERADO':
+                evolucao = 2
+            elif evolucao == 'ÓBITO':
+                evolucao = 3
+            elif evolucao == 'INTERNADO UTI':
+                evolucao = 4
+            elif evolucao == 'NÃO INFORMADO':
+                evolucao = 5
+
+            return evolucao
+        
+        self.df['evolucao'] = self.df['evolucao'].apply(categorizing_evolucao)
+
+
     
     def types_adjustment(self):
         self.df['data_inicio_sintomas'] = self.df['data_inicio_sintomas'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
@@ -116,11 +165,12 @@ class Pre_Processing_Casos_Graves:
 
 
     #Ajustando os dados faltantes e Dropando as colunas não utilizadas
-    def Fillna(self,columns_geral,columns_symptoms,columns_dieases):
+    def Fillna(self,columns_symptoms,columns_dieases):
         #Tratando dados features gerais
-        self.df['sexo'].fillna(self.df['sexo'].describe().top, inplace =True)
-        self.df['idade'].fillna(self.df['idade'].mode(), inplace =True)
-        self.df['bairro'].fillna(self.df['bairro'].describe().top, inplace =True)
+        self.df['sexo'] = self.df['sexo'].fillna(self.df['sexo'].describe().top, inplace =True)
+        self.df['idade'] = self.df['idade'].fillna(self.df['idade'].mode(), inplace =True)
+        self.df['bairro'] = self.df['bairro'].fillna(self.df['bairro'].describe().top, inplace =True)
+        self.df['evolucao'] = self.df['evolucao'].fillna("NÃO INFORMADO", inplace = True)
 
         #Tratando dados features de data
         self.df['data_obito'].fillna('', inplace = True)

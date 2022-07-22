@@ -90,7 +90,7 @@ class Pre_Processing_Casos_Leves:
 
 
     #Ajustando os dados faltantes e Dropando as colunas não utilizadas
-    def Fillna(self,columns_geral,columns_symptoms):
+    def Fillna(self,columns_symptoms):
         #Tratando dados features gerais
         self.df['sexo'].fillna(self.df['sexo'].describe().top, inplace =True)
         self.df['idade'].fillna(self.df['idade'].mode(), inplace =True)
