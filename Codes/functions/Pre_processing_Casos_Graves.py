@@ -7,9 +7,10 @@ from datetime import datetime
 path = r'C:\Users\gabri\Desktop\Git - Tcc\Estudo_dados_de_covid\Data\Casos Graves'
 
 #Listas das features
-list_features = ['data_notificacao','sexo','raca','etnia','idade','municipio_residencia','bairro','distrito_sanitario','data_inicio_sintomas',
+list_features_graves = ['data_notificacao','sexo','raca','etnia','idade','municipio_residencia','bairro','distrito_sanitario','data_inicio_sintomas',
                 'sintomas','outros_sintomas','doencas_preexistentes','outras_doencas_preexistentes','profissional_saude','categoria_profissional',
                 'classificacao_final','evolucao','data_obito']
+
 
 columns_to_drop = ['etnia','municipio_residencia','raca','profissional_saude','distrito_sanitario','categoria_profissional']
 columns_geral = ['sexo','data_notificacao','idade','data_inicio_sintomas','classificacao_final','bairro','evolucao','data_obito']
@@ -71,18 +72,28 @@ class Pre_Processing_Casos_Graves:
         self.df2 = None #Dataset com o número de aparições de cada sintoma
         self.df3 = None #Dataser com o número de aparições de cada doença
         self.path = None
+
         self.df_temp = None 
 
     #Função para rodar todas as outras na ordem certa!! Teoricamente só usando a run ja faz o pré processamento!!
-    def run(self,columns_geral,columns_symptoms,columns_to_drop,columns_dieases,path):
+    
+    def run(self,columns_symptoms,columns_to_drop,columns_dieases,path):
+        #pre-processing
         self.merge(path)
-        self.Fillna(columns_geral,columns_symptoms,columns_dieases)
+        self.Fillna(columns_symptoms,columns_dieases)
         self.Drop(columns_to_drop)
         self.Split_symbols(columns_symptoms[0],columns_symptoms[1],columns_dieases[0],columns_dieases[1])
+        self.age_adjustment()
+        self.types_adjustment()
+        self.encoding()
+
+        # feature engineering
         self.add_symptoms_columns()
         self.add_dieases_columns()
         self.categorizing_symptoms()
         self.categorizing_dieases()
+
+        #Creating news datasets
         self.creating_data_symptoms()
         self.creating_data_dieases()
 
@@ -109,7 +120,7 @@ class Pre_Processing_Casos_Graves:
             else:
                 self.df['idade'][i] = int(self.df['idade'][i])
 
-    def encoding_feature_sexo (self):
+    def encoding (self):
         def categorizing_sexo(sexo):
             if sexo == 'Masculino':
                 sexo = 1
@@ -119,10 +130,7 @@ class Pre_Processing_Casos_Graves:
                 sexo = 0
 
             return sexo
-        
-        self.df['sexo'] = self.df['sexo'].apply(categorizing_sexo)
-    
-    def encoding_feature_classificacao_final(self):
+
         def categorizing_classificacao(classificacao):
             if classificacao == 'DESCARTADO':
                 classificacao = 0
@@ -135,9 +143,6 @@ class Pre_Processing_Casos_Graves:
 
             return classificacao
         
-        self.df['classificacao_final'] = self.df['classificacao_final'].apply(categorizing_classificacao)
-    
-    def encoding_feature_evolucao(self):
         def categorizing_evolucao(evolucao):
             if evolucao == 'ISOLAMENTO DOMICILIAR':
                 evolucao = 0
@@ -149,15 +154,19 @@ class Pre_Processing_Casos_Graves:
                 evolucao = 3
             elif evolucao == 'INTERNADO UTI':
                 evolucao = 4
-            elif evolucao == 'NÃO INFORMADO':
+            elif evolucao == 'EM ANÁLISE':
                 evolucao = 5
+            elif evolucao == 'NÃO INFORMADO':
 
             return evolucao
-        
+
+
+        self.df['classificacao_final'] = self.df['classificacao_final'].apply(categorizing_classificacao)
+        self.df['sexo'] = self.df['sexo'].apply(categorizing_sexo)         
         self.df['evolucao'] = self.df['evolucao'].apply(categorizing_evolucao)
 
 
-    
+
     def types_adjustment(self):
         self.df['data_inicio_sintomas'] = self.df['data_inicio_sintomas'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
         self.df['data_notificacao'] = self.df['data_notificacao'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
@@ -167,10 +176,10 @@ class Pre_Processing_Casos_Graves:
     #Ajustando os dados faltantes e Dropando as colunas não utilizadas
     def Fillna(self,columns_symptoms,columns_dieases):
         #Tratando dados features gerais
-        self.df['sexo'] = self.df['sexo'].fillna(self.df['sexo'].describe().top, inplace =True)
-        self.df['idade'] = self.df['idade'].fillna(self.df['idade'].mode(), inplace =True)
-        self.df['bairro'] = self.df['bairro'].fillna(self.df['bairro'].describe().top, inplace =True)
-        self.df['evolucao'] = self.df['evolucao'].fillna("NÃO INFORMADO", inplace = True)
+        self.df['sexo'].fillna((self.df['sexo'].describe().top), inplace =True)
+        self.df['idade'].fillna((self.df['idade'].mode()), inplace =True)
+        self.df['bairro'].fillna((self.df['bairro'].describe().top), inplace =True)
+        self.df['evolucao'].fillna("NÃO INFORMADO", inplace = True)
 
         #Tratando dados features de data
         self.df['data_obito'].fillna('', inplace = True)
