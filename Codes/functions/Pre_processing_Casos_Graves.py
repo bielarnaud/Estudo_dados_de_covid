@@ -114,11 +114,15 @@ class Pre_Processing_Casos_Graves:
         list_months = ['IGN', '0 meses', '1 meses', '1 mês', '1 mes', '2 meses','3 meses','4 meses','5 meses', '6 meses', '7 meses','8 meses', 
                         '9 meses','10 meses', '11 meses', '12 meses']
 
-        for i in range(len(self.df)):
-            if self.df['idade'][i] in list_months:
-                self.df['idade'][i] = 0
+        def if_in_list_months(idade):
+            if idade in list_months:
+                idade = 0
             else:
-                self.df['idade'][i] = int(self.df['idade'][i])
+                idade = idade
+                
+            return idade
+        
+        self.df['idade'] = self.df['idade'].apply(if_in_list_months)
 
     def encoding (self):
         def categorizing_sexo(sexo):
@@ -157,6 +161,7 @@ class Pre_Processing_Casos_Graves:
             elif evolucao == 'EM ANÁLISE':
                 evolucao = 5
             elif evolucao == 'NÃO INFORMADO':
+                evolucao = 6
 
             return evolucao
 
@@ -177,7 +182,7 @@ class Pre_Processing_Casos_Graves:
     def Fillna(self,columns_symptoms,columns_dieases):
         #Tratando dados features gerais
         self.df['sexo'].fillna((self.df['sexo'].describe().top), inplace =True)
-        self.df['idade'].fillna((self.df['idade'].mode()), inplace =True)
+        self.df['idade'].fillna((self.df['idade'].mode()[0]), inplace =True)
         self.df['bairro'].fillna((self.df['bairro'].describe().top), inplace =True)
         self.df['evolucao'].fillna("NÃO INFORMADO", inplace = True)
 

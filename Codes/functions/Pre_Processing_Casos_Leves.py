@@ -51,13 +51,21 @@ class Pre_Processing_Casos_Leves:
         self.df_temp = None 
 
 
-    def run(self,columns_geral,columns_symptoms,columns_to_drop,path):
+    def run(self,columns_symptoms,columns_to_drop,path):
+        #pre-processing
         self.merge(path)
-        self.Fillna(columns_geral,columns_symptoms)
+        self.Fillna(columns_symptoms)
         self.Drop(columns_to_drop)
         self.Split_symbols(columns_symptoms[0],columns_symptoms[1])
+        self.age_adjustment()
+        self.types_adjustment()
+        self.encoding()
+
+        # feature engineering
         self.add_symptoms_columns()
         self.categorizing_symptoms()
+
+        #Creating news datasets
         self.creating_data_symptoms()
 
     #Concatenando os datasets
@@ -77,26 +85,56 @@ class Pre_Processing_Casos_Leves:
         list_months = ['IGN', '0 meses', '1 meses', '1 mês', '1 mes', '2 meses','3 meses','4 meses','5 meses', '6 meses', '7 meses','8 meses', 
                         '9 meses','10 meses', '11 meses', '12 meses']
 
-        for i in range(len(self.df)):
-            if self.df['idade'][i] in list_months:
-                self.df['idade'][i] = 0
+        def if_in_list_months(idade):
+            if idade in list_months:
+                idade = 0
             else:
-                self.df['idade'][i] = int(self.df['idade'][i])
-    
+                idade = idade
+
+            return idade
+
+        self.df['idade'] = self.df['idade'].apply(if_in_list_months)
+
     def types_adjustment(self):
         self.df['data_inicio_sintomas'] = self.df['data_inicio_sintomas'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
         self.df['data_notificacao'] = self.df['data_notificacao'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
         self.df['idade'] = self.df['idade'].astype(int)
 
+    def encoding (self):
+        def categorizing_sexo(sexo):
+            if sexo == 'Masculino':
+                sexo = 1
+            elif sexo == 'Feminino':
+                sexo = 0
+            elif sexo == 'Ignorado':
+                sexo = 0
+
+            return sexo
+
+        def categorizing_classificacao(classificacao):
+            if classificacao == 'DESCARTADO':
+                classificacao = 0
+            elif classificacao == 'INCONCLUSIVO':
+                classificacao = 1
+            elif classificacao == 'CONFIRMADO':
+                classificacao = 2
+            elif classificacao == 'EM ANÁLISE':
+                classificacao == 3
+
+            return classificacao
+
+
+        self.df['classificacao_final'] = self.df['classificacao_final'].apply(categorizing_classificacao)
+        self.df['sexo'] = self.df['sexo'].apply(categorizing_sexo)         
 
     #Ajustando os dados faltantes e Dropando as colunas não utilizadas
     def Fillna(self,columns_symptoms):
         #Tratando dados features gerais
-        self.df['sexo'].fillna(self.df['sexo'].describe().top, inplace =True)
-        self.df['idade'].fillna(self.df['idade'].mode(), inplace =True)
-        self.df['bairro'].fillna(self.df['bairro'].describe().top, inplace =True)
+        self.df['sexo'].fillna((self.df['sexo'].describe().top), inplace =True)
+        self.df['idade'].fillna((self.df['idade'].mode()[0]), inplace =True)
+        self.df['bairro'].fillna((self.df['bairro'].describe().top), inplace =True)
 
-        # Tratando a feature dos sintomas
+        #tratando a features das doenças e dos sintomas
         for column in columns_symptoms:
             self.df[column].fillna( '' , inplace = True )
     
