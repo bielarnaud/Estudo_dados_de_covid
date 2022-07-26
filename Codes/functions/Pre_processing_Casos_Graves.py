@@ -144,6 +144,8 @@ class Pre_Processing_Casos_Graves:
                 classificacao = 2
             elif classificacao == 'EM ANÁLISE':
                 classificacao == 3
+            elif classificacao == 'NÃO INFORMADO':
+                classificacao = 4
 
             return classificacao
         
@@ -185,6 +187,7 @@ class Pre_Processing_Casos_Graves:
         self.df['idade'].fillna((self.df['idade'].mode()[0]), inplace =True)
         self.df['bairro'].fillna((self.df['bairro'].describe().top), inplace =True)
         self.df['evolucao'].fillna("NÃO INFORMADO", inplace = True)
+        self.df['classificacao_final'].fillna('NÃO INFORMADO', inplace = True)
 
         #Tratando dados features de data
         self.df['data_obito'].fillna('', inplace = True)

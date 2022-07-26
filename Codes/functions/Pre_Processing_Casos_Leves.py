@@ -11,8 +11,9 @@ path = r'C:\Users\gabri\Desktop\Git - Tcc\Estudo_dados_de_covid\Data\Casos Leves
 list_features = ['sexo','data_notificacao','idade','data_inicio_sintomas','sintomas','outros_sintomas','classificacao_final','evolucao_caso',
                  'resultado_final','etnia','raca_cor','profissional_saude','cbo','bairro','ds','municipio_residencia']
 
-columns_to_drop = ['etnia','cbo','municipio_residencia','evolucao_caso','raca_cor','ds','profissional_saude']
-columns_geral = ['sexo','data_notificacao','idade','data_inicio_sintomas','classificacao_final','resultado_final','bairro']
+columns_to_drop = ['etnia','cbo','municipio_residencia','evolucao_caso','raca_cor','ds','profissional_saude','resultaado_final']
+
+columns_geral = ['sexo','data_notificacao','idade','data_inicio_sintomas','bairro','classificacao_final', 'resultado_final']
 columns_symptoms = ['sintomas','outros_sintomas']
 
 #Categorias dos sintomas
@@ -110,29 +111,51 @@ class Pre_Processing_Casos_Leves:
                 sexo = 0
 
             return sexo
-
         def categorizing_classificacao(classificacao):
-            if classificacao == 'DESCARTADO':
+            if classificacao == 'Descartado':
                 classificacao = 0
-            elif classificacao == 'INCONCLUSIVO':
+            elif classificacao == 'Confirmado Laboratorial':
                 classificacao = 1
-            elif classificacao == 'CONFIRMADO':
+            elif classificacao == 'Síndrome Gripal Não Especificada':
                 classificacao = 2
-            elif classificacao == 'EM ANÁLISE':
-                classificacao == 3
+            elif classificacao == 'Confirmado Clínico-Epidemiológico':
+                classificacao = 3
+            elif classificacao == 'Confirmação Laboratorial':
+                classificacao = 4
+            elif classificacao == 'Confirmado Clínico-Imagem':
+                classificacao = 5
+            elif classificacao == 'Confirmado por Critério Clínico':
+                classificacao = 6
+            elif classificacao == 'NÃO INFORMADO':
+                classificacao = 7
 
             return classificacao
+        
+        def categorizing_resultado(resultado):
+            if resultado == 'Negativo':
+                resultado = 1
+            elif resultado == 'Positivo':
+                resultado = 2
+            elif resultado == 'Inconclusivo ou indeterminado':
+                resultado = 3
+            elif resultado == 'NÃO INFORMADO':
+                resultado = 4
+
+            return resultado
 
 
         self.df['classificacao_final'] = self.df['classificacao_final'].apply(categorizing_classificacao)
+        self.df['resultado_final'] = self.df['resultado_final'].apply(categorizing_resultado)
         self.df['sexo'] = self.df['sexo'].apply(categorizing_sexo)         
 
     #Ajustando os dados faltantes e Dropando as colunas não utilizadas
     def Fillna(self,columns_symptoms):
         #Tratando dados features gerais
-        self.df['sexo'].fillna((self.df['sexo'].describe().top), inplace =True)
-        self.df['idade'].fillna((self.df['idade'].mode()[0]), inplace =True)
-        self.df['bairro'].fillna((self.df['bairro'].describe().top), inplace =True)
+        self.df['sexo'].fillna((self.df['sexo'].describe().top), inplace = True)
+        self.df['idade'].fillna((self.df['idade'].mode()[0]), inplace = True)
+        self.df['bairro'].fillna((self.df['bairro'].describe().top), inplace = True)
+        self.df['classificacao_final'].fillna('NÃO INFORMADO', inplace = True)
+        self.df['resultado_final'].fillna('NÃO INFORMADO', inplace = True)
 
         #tratando a features das doenças e dos sintomas
         for column in columns_symptoms:
