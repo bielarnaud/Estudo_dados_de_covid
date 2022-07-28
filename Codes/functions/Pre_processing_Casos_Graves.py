@@ -85,13 +85,17 @@ class Pre_Processing_Casos_Graves:
         self.Split_symbols(columns_symptoms[0],columns_symptoms[1],columns_dieases[0],columns_dieases[1])
         self.age_adjustment()
         self.types_adjustment()
-        self.encoding()
 
         # feature engineering
+        self.categorizing_age()
         self.add_symptoms_columns()
         self.add_dieases_columns()
         self.categorizing_symptoms()
         self.categorizing_dieases()
+        self.add_feature_death()
+
+        #self.encoding()
+        
 
         #Creating news datasets
         self.creating_data_symptoms()
@@ -123,6 +127,31 @@ class Pre_Processing_Casos_Graves:
             return idade
         
         self.df['idade'] = self.df['idade'].apply(if_in_list_months)
+    
+    #Criando uma nova feature que divide as idades em grupos
+
+    def categorizing_age(self):
+        self.df['age_group'] = self.df['idade']
+
+        def creating_age_groups(x):
+            if 0 <= x <= 5:
+                x = '0 - 5'
+            elif 6 <= x <= 15:
+                x = '6 - 15'
+            elif 16 <= x <= 25:
+                x = '16 - 25'
+            elif 26 <= x <= 40:
+                x = '26 - 40'
+            elif 41 <= x <= 60:
+                x = '41 - 60'
+            elif 61 <= x <= 80:
+                x = '61 - 80'
+            else:
+                x = '>80'
+            
+            return x
+
+        self.df['age_group'] = self.df['age_group'].apply(creating_age_groups)
 
     def encoding (self):
         def categorizing_sexo(sexo):
@@ -167,10 +196,29 @@ class Pre_Processing_Casos_Graves:
 
             return evolucao
 
+        def categorizing_ege_group(age_group):
+            if age_group == '0 - 5':
+                age_group = 1
+            elif age_group == '6 - 15':
+                age_group = 2
+            elif age_group == '16 - 25':
+                age_group = 3
+            elif age_group == '26 - 40':
+                age_group = 4
+            elif age_group == '41 - 60':
+                age_group = 5
+            elif age_group == '61 - 80':
+                age_group = 6
+            elif age_group == '>80':
+                age_group = 7
+            
+            return age_group
+
 
         self.df['classificacao_final'] = self.df['classificacao_final'].apply(categorizing_classificacao)
         self.df['sexo'] = self.df['sexo'].apply(categorizing_sexo)         
         self.df['evolucao'] = self.df['evolucao'].apply(categorizing_evolucao)
+        self.df['age_group'] = self.df['age_group'].apply(categorizing_ege_group)
 
 
 
@@ -244,25 +292,51 @@ class Pre_Processing_Casos_Graves:
                 for dieases in value:
                     if (dieases in self.df['doencas_preexistentes'][i]) or (dieases in self.df['outras_doencas_preexistentes '][i]):
                         self.df[column][i] = 1
+
+    #add uma feature para obito
+
+    def add_feature_death(self):
+        self.df['death'] = self.df['data_obito']
+        
+        def categorizing_death(x):
+            if x != '':
+                x = 1
+            else:
+                x = 0
+            
+            return x
+        
+        self.df['death'] = self.df['death'].apply(categorizing_death)
     
+
     #Criando Dataset com o número de aparições dos sintomas e doenças: 
 
     def creating_data_symptoms(self):
         count_symptoms = []
+        perc_list = []
 
         for symptom in list_symptoms: 
             count = len(self.df[self.df[symptom] == 1])
+            perc = (count/len(self.df))*100
+            
+            perc_list.append(perc)
             count_symptoms.append(count)
         
         self.df2 = pd.DataFrame(list_symptoms,columns=["Sintoma"])
         self.df2["Count"] = count_symptoms
+        self.df2['percentage'] = perc_list
 
     def creating_data_dieases(self):
         count_dieases = []
+        perc_list_2 = []
 
         for dieases in list_dieases:
             count = len(self.df[self.df[dieases] == 1])
+            perc_2 = (count/len(self.df))*100
+            
+            perc_list_2.append(perc_2)
             count_dieases.append(count)
 
         self.df3 = pd.DataFrame(list_dieases, columns=["Doencas_preexistentes"])
         self.df3['Count'] = count_dieases
+        self.df3['percentage'] = perc_list_2
