@@ -72,7 +72,6 @@ class Pre_Processing_Casos_Graves:
         self.df2 = None #Dataset com o número de aparições de cada sintoma
         self.df3 = None #Dataser com o número de aparições de cada doença
         self.path = None
-
         self.df_temp = None 
 
     #Função para rodar todas as outras na ordem certa!! Teoricamente só usando a run ja faz o pré processamento!!

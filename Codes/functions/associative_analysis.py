@@ -10,7 +10,7 @@ columns_to_associete = ['DISEASE_HEART_OR_VASCULAR','DISEASE_DIABETES','DISEASE_
                         'SYMPTOM_COUGH','SYMPTOM_COLD','SYMPTOM_AIR_INSUFFICIENCY','SYMPTOM_FEVER','SYMPTOM_LOW_OXYGEN_SATURATION',
                         'SYMPTOM_BREATHING_CONDITION','SYMPTOM_TORACIC_APERTURE','SYMPTOM_THROAT_CONDITION','SYMPTOM_HEADACHE','SYMPTOM_BODY_PAIN',
                         'SYMPTOM_DIARRHEA','SYMPTOM_RUNNY_NOSE','SYMPTOM_NOSE_CONGESTION','SYMPTOM_WEAKNESS','SYMPTOM_ANOSMIA_OR_HYPOSMIA',
-                        'SYMPTOM_NAUSEA','SYMPTOM_LACK_OF_APPETITE','SYMPTOM_ABDOMINAL_PAIN','SYMPTOM_CONSCIOUSNESS_DEGRADATION']
+                        'SYMPTOM_NAUSEA','SYMPTOM_LACK_OF_APPETITE','SYMPTOM_ABDOMINAL_PAIN','SYMPTOM_CONSCIOUSNESS_DEGRADATION','death']
 
 class associative_analysis:
     def __init__(self,df):
@@ -25,11 +25,3 @@ class associative_analysis:
 
         self.frequent_itemsets2 = apriori(self.df2, min_support=0.1, use_colnames=True)
         self.rules2 = association_rules(self.frequent_itemsets2, metric="lift", min_threshold=1)
-    
-    '''
-    def print(self):
-
-        self.rules1[(self.rules1['confidence'] >= 0.8)].sort_values('lift', ascending=False)
-        print('-'*60)
-        self.rules2[(self.rules2['confidence'] >= 0.8)].sort_values('lift', ascending=False)
-    '''
