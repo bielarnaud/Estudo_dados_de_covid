@@ -95,6 +95,32 @@ class Pre_Processing_Casos_Leves:
             return idade
 
         self.df['idade'] = self.df['idade'].apply(if_in_list_months)
+    
+    def categorizing_age(self):
+        self.df['age_group'] = self.df['idade']
+
+        def creating_age_groups(x):
+            if 0 <= x <= 5:
+                x = '0 - 5'
+            elif 6 <= x <= 15:
+                x = '6 - 15'
+            elif 16 <= x <= 25:
+                x = '16 - 25'
+            elif 26 <= x <= 40:
+                x = '26 - 40'
+            elif 41 <= x <= 60:
+                x = '41 - 60'
+            elif 61 <= x <= 80:
+                x = '61 - 80'
+            else:
+                x = '>80'
+            
+            return x
+
+        self.df['age_group'] = self.df['age_group'].apply(creating_age_groups)
+    
+    def one_hot_encoding(self):
+        self.df = pd.get_dummies(self.df, columns = ['age_group'])
 
     def types_adjustment(self):
         self.df['data_inicio_sintomas'] = self.df['data_inicio_sintomas'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))

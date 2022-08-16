@@ -219,7 +219,8 @@ class Pre_Processing_Casos_Graves:
         self.df['evolucao'] = self.df['evolucao'].apply(categorizing_evolucao)
         self.df['age_group'] = self.df['age_group'].apply(categorizing_ege_group)
 
-
+    def one_hot_encoding(self):
+        self.df = pd.get_dummies(self.df, columns = ['age_group'])
 
     def types_adjustment(self):
         self.df['data_inicio_sintomas'] = self.df['data_inicio_sintomas'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
