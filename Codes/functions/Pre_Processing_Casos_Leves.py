@@ -5,7 +5,7 @@ import glob
 from datetime import datetime
 
 # Repositório de armazenamento dos dados dos casos leves
-path = r'C:\Users\mcacs\Desktop\Estudo_dados_de_covid\Data\Casos Leves'
+path = r'C:\Users\gabri\Desktop\Git - Tcc\Estudo_dados_de_covid\Data\Casos Leves'
 
 #Listas das features
 list_features = ['sexo','data_notificacao','idade','data_inicio_sintomas','sintomas','outros_sintomas','classificacao_final','evolucao_caso',
