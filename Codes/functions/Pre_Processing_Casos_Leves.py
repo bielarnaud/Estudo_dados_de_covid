@@ -47,7 +47,6 @@ MAIN_SYMPTOMS = {
 class Pre_Processing_Casos_Leves:
     def __init__(self):
         self.df = None
-        self.df2 = None
         self.path = None
         self.df_temp = None 
 
@@ -65,9 +64,6 @@ class Pre_Processing_Casos_Leves:
         # feature engineering
         self.add_symptoms_columns()
         self.categorizing_symptoms()
-
-        #Creating news datasets
-        self.creating_data_symptoms()
 
     #Concatenando os datasets
     def merge (self,path):
@@ -219,16 +215,4 @@ class Pre_Processing_Casos_Leves:
                 for symptom in value:
                     if (symptom in self.df['sintomas'][i]) or (symptom in self.df['outros_sintomas'][i]):
                         self.df[column][i] = 1
-    
-    #Criando Dataset com o número de aparições dos sintomas: 
-
-    def creating_data_symptoms(self):
-        count_symptoms = []
-
-        for symptom in list_symptoms: 
-            count = len(self.df[self.df[symptom]==1])
-            count_symptoms.append(count)
-        
-        self.df2 = pd.DataFrame(list_symptoms,columns=["Sintoma"])
-        self.df2["Count"] = count_symptoms
     

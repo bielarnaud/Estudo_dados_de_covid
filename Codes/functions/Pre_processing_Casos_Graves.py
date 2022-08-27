@@ -69,8 +69,6 @@ class Pre_Processing_Casos_Graves:
     def __init__(self):
         #self.csv = pd.read_csv(r"C:\Users\gabri\Desktop\TCC\Data\vacinados.csv",index_col=None, header=0,sep=';',decimal=',')
         self.df = None #Dataset completo
-        self.df2 = None #Dataset com o número de aparições de cada sintoma
-        self.df3 = None #Dataser com o número de aparições de cada doença
         self.path = None
         self.df_temp = None 
 
@@ -86,19 +84,12 @@ class Pre_Processing_Casos_Graves:
         self.types_adjustment()
 
         # feature engineering
-        self.categorizing_age()
+        #self.categorizing_age()
         self.add_symptoms_columns()
         self.add_dieases_columns()
         self.categorizing_symptoms()
         self.categorizing_dieases()
         self.add_feature_death()
-
-        #self.encoding()
-        
-
-        #Creating news datasets
-        self.creating_data_symptoms()
-        self.creating_data_dieases()
 
     #Concatenando os datasets
     def merge (self,path):
@@ -308,35 +299,3 @@ class Pre_Processing_Casos_Graves:
         
         self.df['death'] = self.df['death'].apply(categorizing_death)
     
-
-    #Criando Dataset com o número de aparições dos sintomas e doenças: 
-
-    def creating_data_symptoms(self):
-        count_symptoms = []
-        perc_list = []
-
-        for symptom in list_symptoms: 
-            count = len(self.df[self.df[symptom] == 1])
-            perc = (count/len(self.df))*100
-            
-            perc_list.append(perc)
-            count_symptoms.append(count)
-        
-        self.df2 = pd.DataFrame(list_symptoms,columns=["Sintoma"])
-        self.df2["Count"] = count_symptoms
-        self.df2['percentage'] = perc_list
-
-    def creating_data_dieases(self):
-        count_dieases = []
-        perc_list_2 = []
-
-        for dieases in list_dieases:
-            count = len(self.df[self.df[dieases] == 1])
-            perc_2 = (count/len(self.df))*100
-            
-            perc_list_2.append(perc_2)
-            count_dieases.append(count)
-
-        self.df3 = pd.DataFrame(list_dieases, columns=["Doencas_preexistentes"])
-        self.df3['Count'] = count_dieases
-        self.df3['percentage'] = perc_list_2
