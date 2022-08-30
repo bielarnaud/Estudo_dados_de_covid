@@ -58,9 +58,8 @@ class analises:
     def barplot(self, x_axis):
         print('-'*40)
         print(self.df.groupby(x_axis).death.value_counts())
-        sns.barplot(x = x_axis, y ='death', ci = None, data = self.df)
-        plt.title(x_axis)
-        plt.show()
+
+        self.df[self.df[x_axis] == 1].groupby(x_axis).death.value_counts().plot.bar(x = x_axis, y='val', rot=0, color = ['green' , 'blue'])
     
     def barplot_age(self):
 
