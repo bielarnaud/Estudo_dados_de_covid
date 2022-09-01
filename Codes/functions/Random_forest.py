@@ -23,7 +23,7 @@ class Random_forest:
         #self.encoding()
         self.one_hot_encoding ('sexo')
         #self.one_hot_encoding ('classificacao')
-        self.one_hot_encoding ('evolucao')
+        #self.one_hot_encoding ('evolucao')
         self.df['idade'] = self.NormalizeData( self.df['idade'] )
 
 
