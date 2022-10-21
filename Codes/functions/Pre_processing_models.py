@@ -11,10 +11,9 @@ from sklearn import svm
 from sklearn.model_selection import train_test_split, cross_validate, cross_val_score
 from sklearn.feature_selection import SelectKBest, chi2, mutual_info_classif, SelectFdr
 
-import optuna
 from sklearn.metrics import f1_score, precision_score, recall_score
 
-class Random_forest:
+class Pre_processing_models:
     def __init__(self, df) -> None:
         self.df = df
         pass
